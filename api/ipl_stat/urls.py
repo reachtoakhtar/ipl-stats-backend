@@ -1,6 +1,7 @@
 import logging
-from django.contrib import admin
-from django.urls import path, include
+from django.urls import path
+
+from ipl_stat.views import LookupCreateView, StatsView
 
 __author__ = "akhtar"
 
@@ -8,5 +9,6 @@ logger = logging.getLogger(__name__)
 
 
 urlpatterns = [
-    # path('ipl_stat/', include("ipl_stat.urls")),
+    path('lookups/', LookupCreateView.as_view(), name="lookups"),
+    path('stats/', StatsView.as_view(), name="stats"),
 ]

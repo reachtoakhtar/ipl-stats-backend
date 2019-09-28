@@ -1,0 +1,47 @@
+version: "3"
+
+services:
+  web:
+    build: .
+    command: gunicorn api.wsgi --bind 0.0.0.0:8000
+
+    restart: always
+
+    networks:
+      - api
+
+    ports:
+      - "8000:8000"
+
+    volumes:
+      - ./api:/code
+
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_USER: ${POSTGRES_USER}
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      DJANGO_DEBUG: ${DJANGO_DEBUG}
+      DJANGO_DB_HOST: ${DJANGO_DB_HOST}
+      DJANGO_WEB_HOST: ${DJANGO_WEB_HOST}
+      DJANGO_DB_NAME: ${DJANGO_DB_NAME}
+      DJANGO_SU_NAME: ${DJANGO_SU_NAME}
+      DJANGO_SU_EMAIL: ${DJANGO_SU_EMAIL}
+      DJANGO_SU_PASSWORD: ${DJANGO_SU_PASSWORD}
+
+      APP_URL: ${APP_URL}
+      QUALIFIED_APP_URL: ${QUALIFIED_APP_URL}
+
+
+  nginx:
+    image: nginx:latest
+    networks:
+      - api
+    restart: always
+
+    depends_on:
+      - web
+
+
+networks:
+  api:
+    driver: bridge

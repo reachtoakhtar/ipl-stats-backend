@@ -1,6 +1,6 @@
+import csv
 import os
 
-import pandas as pd
 from django.db.models import Count, Max, Q, F
 from rest_framework import status
 
@@ -16,20 +16,18 @@ class LookupCreateView(CreateAPIView):
     def get_object_list(csv_file_name, model_class):
         object_list = []
         path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "fixtures", csv_file_name)
-        df = pd.read_csv(path)
-        df = df.where((pd.notnull(df)), None)
-        headers = list(df.columns)
-        for row in df.iterrows():
-            row = row[1].tolist()
-            kwargs = dict(zip(headers, row))
-            object = model_class(**kwargs)
-            object_list.append(object)
+
+        with open(path, 'rt')as f:
+            data = csv.DictReader(f)
+            for row in data:
+                object = model_class(**row)
+                object_list.append(object)
 
         return object_list
 
     def create(self, request, request_data=None, *args, **kwargs):
-        match_object_list = LookupCreateView.get_object_list("matches.csv", Match)
-        delivery_object_list = LookupCreateView.get_object_list("deliveries.csv", Delivery)
+        match_object_list = LookupCreateView.get_object_list("ipl_stat_match.csv", Match)
+        delivery_object_list = LookupCreateView.get_object_list("ipl_stat_delivery.csv", Delivery)
 
         Match.objects.bulk_create(match_object_list)
         Delivery.objects.bulk_create(delivery_object_list)
@@ -41,7 +39,7 @@ class StatsView(ListAPIView):
     serializer_class = StatSerializer
 
     def get_queryset(self):
-        season = int(self.request.query_params.get("season"))
+        season = int(self.request.query_params.get("season", "2008"))
         return Match.objects.filter(season=season)
 
     def list(self, request, *args, **kwargs):

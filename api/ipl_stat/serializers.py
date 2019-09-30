@@ -12,23 +12,23 @@ logger = logging.getLogger(__name__)
 
 
 class WinSerializer(serializers.Serializer):
-    winner = serializers.CharField(max_length=128)
-    no_of_wins = serializers.IntegerField()
+    x = serializers.CharField(max_length=128, source="winner")
+    y = serializers.IntegerField(source="no_of_wins")
 
 
 class TossWinSerializer(serializers.Serializer):
-    toss_winner = serializers.CharField(max_length=128)
-    no_of_wins = serializers.IntegerField()
+    x = serializers.CharField(max_length=128, source="toss_winner")
+    y = serializers.IntegerField(source="no_of_wins")
 
 
 class TossWinDecisionSerializer(serializers.Serializer):
-    toss_winner = serializers.CharField(max_length=128)
+    x = serializers.CharField(max_length=128, source="toss_winner")
     no_of_wins = serializers.IntegerField()
     field_times = serializers.IntegerField()
     bat_times = serializers.IntegerField()
-    percentage_bat = serializers.SerializerMethodField()
+    y = serializers.SerializerMethodField()
 
-    def get_percentage_bat(self, value):
+    def get_y(self, value):
         percentage = value["bat_times"] * 100 / value["no_of_wins"]
         return math.ceil(percentage)
 

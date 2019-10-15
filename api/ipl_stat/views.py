@@ -1,4 +1,5 @@
 import csv
+import math
 import os
 
 from django.db.models import Count, Max, Q, F
@@ -27,10 +28,14 @@ class LookupCreateView(CreateAPIView):
 
     def create(self, request, request_data=None, *args, **kwargs):
         match_object_list = LookupCreateView.get_object_list("ipl_stat_match.csv", Match)
-        delivery_object_list = LookupCreateView.get_object_list("ipl_stat_delivery.csv", Delivery)
-
         Match.objects.bulk_create(match_object_list)
-        Delivery.objects.bulk_create(delivery_object_list)
+
+        delivery_object_list = LookupCreateView.get_object_list("ipl_stat_delivery.csv", Delivery)
+        loop_times = math.ceil(len(delivery_object_list) / 10000)
+        i = 1
+        for _ in range(1, loop_times + 1):
+            Delivery.objects.bulk_create(delivery_object_list[i:i+10000])
+            i += 10000
 
         return Response(data={"message": "Applied fixtures successfully."}, status=status.HTTP_200_OK)
 
